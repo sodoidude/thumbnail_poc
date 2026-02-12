@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+model RequestLog {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+
+  title             String
+  userConcept       String?
+  conceptUsed       String?
+
+  textProvider      String
+  textModel         String
+  imageProvider     String
+  imageModel        String
+
+  success           Boolean  @default(false)
+  errorMessage      String?
+
+  totalCostUsd      Float    @default(0)
+  latencyMs         Int      @default(0)
+
+  lineItems         RequestCostLineItem[]
+}
+
+model RequestCostLineItem {
+  id           String   @id @default(cuid())
+  requestId    String
+  stage        String   // TEXT | IMAGE (추후 VISION/CONCEPT로 세분화 가능)
+
+  provider     String
+  model        String
+
+  inputTokens  Int?
+  outputTokens Int?
+  totalTokens  Int?
+
+  imageSize    Int?     // 1024
+  imageCount   Int?     // 1
+
+  costUsd      Float    @default(0)
+
+  createdAt    DateTime @default(now())
+
+  request      RequestLog @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([createdAt])
+}
