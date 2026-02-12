@@ -352,7 +352,11 @@ async function callImageEdit(params: {
     const fd = new FormData();
     fd.append("model", apiModel);
     fd.append("prompt", prompt);
-    fd.append("image", new Blob([buf], { type: mime }), "input.png");
+    // Buffer(ArrayBufferLike) -> Uint8Array(ArrayBuffer)로 복사해 Blob에 안전하게 넣기
+    const bytes = new Uint8Array(buf.byteLength);
+    bytes.set(buf); // copy
+    const blob = new Blob([bytes], { type: mime });
+    fd.append("image", blob, "input.png");
     fd.append("n", "1");
     fd.append("size", "1024x1024");
     fd.append("output_format", "png");
